@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+
+{% block title %}Owner Dashboard - RentSafe{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--secondary);">
+                Owner Dashboard
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Welcome, <strong>{{ current_user.name }}</strong> &bull; Aadhaar Verified: <span style="font-family: monospace;">{{ current_user.aadhaar_number_masked }}</span>
+            </p>
+        </div>
+        <div>
+            <a href="{{ url_for('owner_add_flat') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> List New Flat & Upload Deed
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #eff6ff; color: var(--primary);">
+                <i class="fa-solid fa-building"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ counts.total }}</h3>
+                <p>Total Listed Flats</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #ecfdf5; color: var(--success);">
+                <i class="fa-solid fa-stamp"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ counts.approved }}</h3>
+                <p>Lawyer Approved & Active</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #fffbeb; color: var(--warning);">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ counts.pending }}</h3>
+                <p>Pending Lawyer Review</p>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+            <div class="stat-icon" style="background: #fef3c7; color: #b45309;">
+                <i class="fa-solid fa-user-clock"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ counts.pending_requests }}</h3>
+                <p>Pending Tenant Requests</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #fdf2f8; color: #db2777;">
+                <i class="fa-solid fa-comments"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ chats | length }}</h3>
+                <p>Approved Active Chats</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Tenant Requests Section (CRITICAL WORKFLOW) -->
+{% if pending_requests %}
+<div class="card" style="margin-bottom: 2rem; border: 2px solid #fde68a; background: #fffdf5;">
+    <div class="card-header" style="border-color: #fef08a;">
+        <div>
+            <h2 class="card-title" style="color: #92400e;">
+                <i class="fa-solid fa-bell"></i> Incoming Tenant Rental & Chat Requests ({{ pending_requests | length }})
+            </h2>
+            <p style="font-size: 0.82rem; color: #b45309; margin-top: 2px;">
+                These tenants meet your flat criteria and have sent a connection request. Approve to unlock in-app chat.
+            </p>
+        </div>
+        <span class="badge-status badge-pending">{{ pending_requests | length }} Awaiting Decision</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for req in pending_requests %}
+            <div style="background: white; border: 1px solid #fed7aa; border-radius: var(--radius-md); padding: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                            <strong style="font-size: 1.1rem; color: var(--secondary);">{{ req.tenant_name }}</strong>
+                            <span class="badge-status badge-approved" style="font-size: 0.75rem;">
+                                <i class="fa-solid fa-shield-check"></i> Aadhaar Verified: {{ req.tenant_aadhaar }}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-bottom: 0.5rem;">
+                            Request for: {{ req.flat_title }} (₹{{ "{:,.0f}".format(req.rent_monthly) }}/mo)
+                        </div>
+                    </div>
+
+                    <!-- Approve / Decline Buttons -->
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button type="button" onclick="respondTenantRequest({{ req.id }}, 'APPROVE')" class="btn btn-sm btn-success" style="padding: 0.5rem 1rem;">
+                            <i class="fa-solid fa-check"></i> Approve & Allow Chat
+                        </button>
+                        <button type="button" onclick="respondTenantRequest({{ req.id }}, 'REJECT')" class="btn btn-sm btn-danger" style="padding: 0.5rem 0.85rem;">
+                            <i class="fa-solid fa-xmark"></i> Decline
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tenant Profile Match Criteria Summary -->
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; font-size: 0.82rem;">
+                    <span class="spec-chip"><i class="fa-solid fa-people-roof"></i> {{ req.tenant_type | replace('_', ' ') | capitalize }}</span>
+                    <span class="spec-chip"><i class="fa-solid fa-dog"></i> Pets: {{ 'Yes (' + req.pet_details + ')' if req.has_pets else 'No Pets' }}</span>
+                    <span class="spec-chip"><i class="fa-solid fa-utensils"></i> Diet: {{ req.diet_pref | replace('_', ' ') | capitalize }}</span>
+                    <span class="spec-chip"><i class="fa-solid fa-ban-smoking"></i> Smoking: {{ 'Yes' if req.smoking_drinking else 'No' }}</span>
+                    {% if req.occupation %}<span class="spec-chip"><i class="fa-solid fa-briefcase"></i> {{ req.occupation }}</span>{% endif %}
+                </div>
+
+                <!-- Tenant's Introductory Note -->
+                {% if req.request_message %}
+                    <div style="background: #f8fafc; border-left: 3px solid var(--primary); padding: 0.6rem 0.85rem; border-radius: 4px; font-size: 0.82rem; color: #334155;">
+                        <strong>Tenant's Note:</strong> "{{ req.request_message }}"
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: start;">
+    <!-- My Flats Section -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title"><i class="fa-solid fa-house-chimney"></i> My Properties & Deed Verification Status</h2>
+            <span style="font-size: 0.82rem; color: var(--text-muted);">{{ flats | length }} properties</span>
+        </div>
+
+        {% if flats %}
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                {% for flat in flats %}
+                    <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; background: #ffffff;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem;">
+                            <div>
+                                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.25rem;">
+                                    {{ flat.title }}
+                                </h3>
+                                <p style="font-size: 0.82rem; color: var(--text-muted);">
+                                    <i class="fa-solid fa-location-dot"></i> {{ flat.address }}, {{ flat.city }} &bull; {{ flat.flat_type }} ({{ flat.furnishing }})
+                                </p>
+                            </div>
+                            <!-- Deed Verification Badge -->
+                            <div>
+                                {% if flat.deed_status == 'APPROVED' %}
+                                    <span class="badge-status badge-approved">
+                                        <i class="fa-solid fa-circle-check"></i> Deed Verified by Lawyer
+                                    </span>
+                                {% elif flat.deed_status == 'PENDING_LAWYER_REVIEW' %}
+                                    <span class="badge-status badge-pending">
+                                        <i class="fa-solid fa-hourglass-half"></i> Pending Lawyer Verification
+                                    </span>
+                                {% else %}
+                                    <span class="badge-status badge-rejected">
+                                        <i class="fa-solid fa-circle-xmark"></i> Deed Rejected
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Requirements Tags -->
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.9rem;">
+                            <span class="spec-chip"><i class="fa-solid fa-paw"></i> Pets: {{ flat.req_pets | replace('_', ' ') | capitalize }}</span>
+                            <span class="spec-chip"><i class="fa-solid fa-people-group"></i> {{ flat.req_tenant_type | replace('_', ' ') | capitalize }}</span>
+                            <span class="spec-chip"><i class="fa-solid fa-utensils"></i> Food: {{ flat.req_food | replace('_', ' ') | capitalize }}</span>
+                            <span class="spec-chip"><i class="fa-solid fa-ban-smoking"></i> {{ flat.req_smoking_drinking | replace('_', ' ') | capitalize }}</span>
+                        </div>
+
+                        <!-- Rent & Legal Review Notes -->
+                        <div style="background: #f8fafc; border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 0.9rem; font-size: 0.85rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+                                <span>Monthly Rent: <strong>₹{{ "{:,.0f}".format(flat.rent_monthly) }}</strong></span>
+                                <span>Security Deposit: <strong>₹{{ "{:,.0f}".format(flat.deposit) }}</strong></span>
+                            </div>
+
+                            {% if flat.deed_status == 'APPROVED' %}
+                                <div style="color: #065f46; font-size: 0.8rem; border-top: 1px dashed #cbd5e1; padding-top: 0.4rem; margin-top: 0.4rem;">
+                                    <i class="fa-solid fa-scale-balanced"></i> Reviewed & Approved by: <strong>{{ flat.lawyer_name }} ({{ flat.lawyer_badge }})</strong>
+                                    {% if flat.lawyer_notes %}<br><em>"{{ flat.lawyer_notes }}"</em>{% endif %}
+                                </div>
+                            {% elif flat.deed_status == 'PENDING_LAWYER_REVIEW' %}
+                                <div style="color: #92400e; font-size: 0.8rem; border-top: 1px dashed #cbd5e1; padding-top: 0.4rem; margin-top: 0.4rem;">
+                                    <i class="fa-solid fa-info-circle"></i> Uploaded deed: <code>{{ flat.deed_original_name }}</code> is currently in the Lawyer Review Queue. Once certified, it will appear publicly to verified tenants.
+                                </div>
+                            {% elif flat.deed_status == 'REJECTED' %}
+                                <div style="color: #991b1b; font-size: 0.8rem; border-top: 1px dashed #cbd5e1; padding-top: 0.4rem; margin-top: 0.4rem;">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> Rejection Remarks: {{ flat.lawyer_notes or 'Deed document unreadable or mismatched.' }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <a href="{{ url_for('serve_deed', filename=flat.deed_filename) }}" target="_blank" class="btn btn-sm btn-outline">
+                                <i class="fa-solid fa-file-pdf"></i> View Submitted Deed
+                            </a>
+                            <span style="font-size: 0.78rem; color: var(--text-muted);">Listed on {{ flat.created_at }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 3rem 1rem;">
+                <i class="fa-solid fa-house-chimney-crack" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
+                <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">No properties listed yet</h3>
+                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                    List your first flat with your requirements and deed document to begin receiving verified tenant inquiries.
+                </p>
+                <a href="{{ url_for('owner_add_flat') }}" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i> List Your First Flat
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Tenant In-App Chats Section -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title"><i class="fa-solid fa-comments"></i> In-App Tenant Chats</h2>
+            <span class="role-tag tenant">{{ chats | length }} active</span>
+        </div>
+
+        {% if chats %}
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for chat in chats %}
+                    <a href="{{ url_for('view_chat', chat_id=chat.id) }}" style="text-decoration: none; color: inherit;">
+                        <div style="border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.9rem; background: #ffffff; transition: background 0.15s ease;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                                <strong style="font-size: 0.92rem; color: var(--secondary);">{{ chat.tenant_name }}</strong>
+                                {% if chat.unread_count > 0 %}
+                                    <span style="background: var(--danger); color: white; border-radius: 9999px; padding: 2px 7px; font-size: 0.7rem; font-weight: 700;">
+                                        {{ chat.unread_count }} new
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div style="font-size: 0.78rem; color: var(--primary); font-weight: 600; margin-bottom: 0.35rem;">
+                                {{ chat.flat_title }}
+                            </div>
+                            <p style="font-size: 0.82rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.4rem;">
+                                {{ chat.last_message or 'Conversation started' }}
+                            </p>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #94a3b8;">
+                                <span><i class="fa-solid fa-check-double"></i> Requirements Checked</span>
+                                <span>{{ chat.last_message_time or '' }}</span>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem 1rem;">
+                <i class="fa-regular fa-comment-dots" style="font-size: 2.2rem; color: #cbd5e1; margin-bottom: 0.75rem;"></i>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    When verified tenants who meet your flat criteria reach out, messages will appear here.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function respondTenantRequest(chatId, action) {
+    const actionText = action === 'APPROVE' ? 'approve this tenant and enable in-app chat' : 'decline this request';
+    if (!confirm(`Are you sure you want to ${actionText}?`)) return;
+
+    try {
+        const res = await fetch(`/api/owner/chat-request/${chatId}/respond`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: action })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert(data.error || 'Failed to update request.');
+        }
+    } catch (e) {
+        alert('Network error updating request.');
+    }
+}
+</script>
+{% endblock %}

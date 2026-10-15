@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate Lawyer Account & ID - Admin Console - RentSafe{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 0 auto 3rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+        <div>
+            <span class="role-tag admin" style="margin-bottom: 0.4rem; display: inline-block;">Admin Authorization Gateway</span>
+            <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--secondary);">
+                Generate Panel Lawyer Account
+            </h1>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+                Lawyers cannot self-register. Issue certified lawyer IDs and credentials here.
+            </p>
+        </div>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm btn-outline">
+            <i class="fa-solid fa-arrow-left"></i> Back to Admin Dashboard
+        </a>
+    </div>
+
+    <div class="card" style="border-top: 4px solid #b91c1c;">
+        <div class="alert alert-warning" style="margin-bottom: 1.5rem; font-size: 0.85rem;">
+            <i class="fa-solid fa-scale-balanced" style="color: #b45309; font-size: 1.25rem;"></i>
+            <div>
+                <strong>Security Rule:</strong> An official unique Lawyer ID (format: <code>LAW-2026-XXXX</code>) will be generated and permanently associated with this advocate's Bar Council registration.
+            </div>
+        </div>
+
+        <form action="{{ url_for('admin_generate_lawyer') }}" method="POST">
+            <!-- Suggested Lawyer ID Preview -->
+            <div style="background: #fee2e2; border: 1px solid #fca5a5; border-radius: var(--radius-sm); padding: 0.85rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: #991b1b;">System Assigned Lawyer ID:</div>
+                    <div style="font-size: 1.3rem; font-weight: 800; font-family: monospace; color: #b91c1c;">{{ suggested_id }}</div>
+                </div>
+                <span class="role-tag lawyer"><i class="fa-solid fa-certificate"></i> Panel ID</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="name"><i class="fa-solid fa-user-tie"></i> Advocate Legal Name:</label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Adv. Rajesh Sharma" required autofocus>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="bar_council_reg"><i class="fa-solid fa-gavel"></i> Bar Council Registration No:</label>
+                    <input type="text" id="bar_council_reg" name="bar_council_reg" class="form-control" placeholder="e.g. MAH/4829/2014" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="specialization"><i class="fa-solid fa-scale-balanced"></i> Practice Specialization:</label>
+                    <input type="text" id="specialization" name="specialization" class="form-control" value="Property & Title Verification" placeholder="e.g. Real Estate & Title Law">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="email"><i class="fa-solid fa-envelope"></i> Official Lawyer Email:</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="e.g. adv.sharma@legalchambers.in" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="phone"><i class="fa-solid fa-phone"></i> Contact Phone:</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="+91 98211 44555">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password"><i class="fa-solid fa-key"></i> Initial Login Password:</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Create strong password (min 8 chars, letter, digit, special char)" required>
+                <div style="margin-top: 0.5rem; font-size: 0.78rem; color: #64748b; background: #f8fafc; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                    <strong>Password Rules:</strong> Minimum 8 characters, at least one letter (a-z), at least one digit (0-9), and at least one special character (!@#$%^&*).
+                </div>
+                <small style="color: var(--text-muted); font-size: 0.75rem;">The lawyer will use their generated Lawyer ID and this password to log in.</small>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="background: #b91c1c; border-color: #b91c1c; padding: 0.75rem 2rem;">
+                    <i class="fa-solid fa-id-card"></i> Generate Lawyer Account
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

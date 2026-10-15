@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Tenant Account - RentSafe{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper" style="max-width: 650px;">
+    <div class="auth-card">
+        <div class="auth-header" style="background: linear-gradient(135deg, #312e81, #1e1b4b);">
+            <span class="role-tag tenant" style="margin-bottom: 0.5rem; display: inline-block;">Tenant Registration</span>
+            <h2 style="font-size: 1.5rem; font-weight: 800;">Find Verified Rental Homes</h2>
+            <p style="font-size: 0.85rem; opacity: 0.85;">Aadhaar-verified tenant identity with smart owner-criteria matching & in-app chat</p>
+        </div>
+
+        <div style="padding: 2rem;">
+            <input type="hidden" id="register-role" value="tenant">
+
+            <!-- Step Progress Indicator -->
+            <div class="steps-indicator">
+                <div class="step-item active" id="ind-step-1">
+                    <div class="step-circle"><i class="fa-solid fa-envelope"></i></div>
+                    <span class="step-label">1. Email OTP</span>
+                </div>
+                <div class="step-item" id="ind-step-2">
+                    <div class="step-circle"><i class="fa-solid fa-id-card"></i></div>
+                    <span class="step-label">2. Aadhaar OTP</span>
+                </div>
+                <div class="step-item" id="ind-step-3">
+                    <div class="step-circle"><i class="fa-solid fa-user-gear"></i></div>
+                    <span class="step-label">3. Tenant Profile</span>
+                </div>
+            </div>
+
+            <!-- ================= STEP 1: REAL EMAIL OTP ================= -->
+            <div id="step-1-box">
+                <div id="step1-alert" style="display: none;"></div>
+
+                <div style="margin-bottom: 1.25rem;">
+                    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem;">
+                        <i class="fa-solid fa-envelope-circle-check" style="color: var(--primary);"></i> Step 1: Verify Your Email Address
+                    </h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted);">
+                        We dispatch a real 6-digit OTP code to your email inbox. The OTP is never revealed on the screen.
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="reg-email">Email Address:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="email" id="reg-email" class="form-control" placeholder="e.g. tenant.name@gmail.com" required>
+                        <button type="button" id="btn-send-email-otp" class="btn btn-primary" style="white-space: nowrap;">
+                            <i class="fa-solid fa-paper-plane"></i> Send Real OTP
+                        </button>
+                    </div>
+                </div>
+
+                <!-- OTP Input Section -->
+                <div id="email-otp-section" style="display: none; background: #eff6ff; border: 1px dashed var(--primary); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
+                    <label class="form-label" for="reg-email-otp" style="color: #1e40af;">
+                        <i class="fa-solid fa-key"></i> Enter 6-Digit Email OTP:
+                    </label>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                        Check your email inbox or spam folder for the one-time passcode.
+                    </p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="reg-email-otp" class="form-control" placeholder="Enter 6-digit OTP" maxlength="6" style="letter-spacing: 4px; font-weight: 700; text-align: center; font-size: 1.1rem;">
+                        <button type="button" id="btn-verify-email-otp" class="btn btn-success" style="white-space: nowrap;">
+                            <i class="fa-solid fa-check"></i> Verify Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= STEP 2: AADHAAR CARD OTP ================= -->
+            <div id="step-2-box" style="display: none;">
+                <div id="step2-alert" style="display: none;"></div>
+
+                <div style="margin-bottom: 1.25rem;">
+                    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem;">
+                        <i class="fa-solid fa-fingerprint" style="color: var(--success);"></i> Step 2: Aadhaar Card ID Verification
+                    </h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted);">
+                        Legitimate owners prefer verified tenants. Authenticate your identity with your 12-digit Indian Aadhaar.
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="reg-aadhaar">12-Digit Indian Aadhaar Number:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="reg-aadhaar" class="form-control" placeholder="e.g. 4829 1048 5910" maxlength="14" required>
+                        <button type="button" id="btn-send-aadhaar-otp" class="btn btn-primary" style="white-space: nowrap;">
+                            <i class="fa-solid fa-shield-halved"></i> Request UIDAI OTP
+                        </button>
+                    </div>
+                    <small style="color: var(--text-muted); font-size: 0.75rem;">Only masked numbers (XXXX-XXXX-1234) are stored securely.</small>
+                </div>
+
+                <!-- Aadhaar OTP section -->
+                <div id="aadhaar-otp-section" style="display: none; background: #ecfdf5; border: 1px dashed var(--success); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
+                    <p id="aadhaar-linked-mobile-text" style="font-size: 0.85rem; color: #065f46; margin-bottom: 0.5rem;"></p>
+                    <label class="form-label" for="reg-aadhaar-otp" style="color: #065f46;">
+                        <i class="fa-solid fa-mobile-screen-button"></i> Enter Aadhaar OTP:
+                    </label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="reg-aadhaar-otp" class="form-control" placeholder="6-digit UIDAI OTP" maxlength="6" style="letter-spacing: 4px; font-weight: 700; text-align: center; font-size: 1.1rem;">
+                        <button type="button" id="btn-verify-aadhaar-otp" class="btn btn-success" style="white-space: nowrap;">
+                            <i class="fa-solid fa-circle-check"></i> Verify Identity
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= STEP 3: TENANT PROFILE & LIFESTYLE ================= -->
+            <div id="step-3-box" style="display: none;">
+                <div id="step3-alert" style="display: none;"></div>
+
+                <div style="margin-bottom: 1.25rem;">
+                    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem;">
+                        <i class="fa-solid fa-user-check" style="color: var(--success);"></i> Step 3: Tenant Lifestyle & Criteria
+                    </h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted);">
+                        Owners list specific requirements (pets, family/bachelor, diet). Your profile guarantees smooth compatibility and enables instant in-app chat.
+                    </p>
+                </div>
+
+                <!-- Verified Summary Badges -->
+                <div style="display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+                    <span class="badge-status badge-approved" style="font-size: 0.78rem;">
+                        <i class="fa-solid fa-check-circle"></i> Email: <span id="final-verified-email"></span>
+                    </span>
+                    <span class="badge-status badge-approved" style="font-size: 0.78rem;">
+                        <i class="fa-solid fa-id-card"></i> Aadhaar: <span id="final-verified-aadhaar"></span>
+                    </span>
+                </div>
+
+                <form id="final-register-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="reg-name"><i class="fa-solid fa-user"></i> Full Legal Name:</label>
+                            <input type="text" id="reg-name" class="form-control" placeholder="e.g. Rohit Verma" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-phone"><i class="fa-solid fa-phone"></i> Mobile Phone:</label>
+                            <input type="tel" id="reg-phone" class="form-control" placeholder="+91 98455 12345">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="tenant_type"><i class="fa-solid fa-people-roof"></i> Tenant Category:</label>
+                            <select id="tenant_type" class="form-control">
+                                <option value="bachelor">Bachelor / Working Professional</option>
+                                <option value="family">Family</option>
+                                <option value="female_tenant">Female Only Group / Solo</option>
+                                <option value="company_lease">Corporate / Company Lease</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="diet_pref"><i class="fa-solid fa-utensils"></i> Dietary Preference:</label>
+                            <select id="diet_pref" class="form-control">
+                                <option value="no_preference">No Preference / Both</option>
+                                <option value="veg">Strictly Vegetarian</option>
+                                <option value="non_veg">Non-Vegetarian</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="occupation"><i class="fa-solid fa-briefcase"></i> Occupation / Designation:</label>
+                            <input type="text" id="occupation" class="form-control" placeholder="e.g. Senior Software Engineer">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="pet_details"><i class="fa-solid fa-dog"></i> Pet Details (if any):</label>
+                            <input type="text" id="pet_details" class="form-control" placeholder="e.g. 1 Golden Retriever, or leave blank">
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1.25rem; display: flex; gap: 2rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; font-weight: 600; cursor: pointer;">
+                            <input type="checkbox" id="has_pets" style="width: 18px; height: 18px;">
+                            <span>I have pet(s)</span>
+                        </label>
+
+                        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; font-weight: 600; cursor: pointer;">
+                            <input type="checkbox" id="smoking_drinking" style="width: 18px; height: 18px;">
+                            <span>Smoking / Drinking</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="reg-password"><i class="fa-solid fa-lock"></i> Create Secure Password:</label>
+                        <input type="password" id="reg-password" class="form-control" placeholder="Create strong password" required>
+                        
+                        <!-- Live Password Complexity Checklist -->
+                        <div id="pw-rules-box" style="margin-top: 0.6rem; padding: 0.75rem 0.9rem; background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.78rem;">
+                            <div style="font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Password Requirements:</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
+                                <div id="rule-length" style="color: #94a3b8;"><i class="fa-solid fa-circle-xmark"></i> At least 8 characters</div>
+                                <div id="rule-letter" style="color: #94a3b8;"><i class="fa-solid fa-circle-xmark"></i> At least one letter (a-z)</div>
+                                <div id="rule-digit" style="color: #94a3b8;"><i class="fa-solid fa-circle-xmark"></i> At least one digit (0-9)</div>
+                                <div id="rule-special" style="color: #94a3b8;"><i class="fa-solid fa-circle-xmark"></i> Special char (!@#$%^&*)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-submit-registration" class="btn btn-primary" style="width: 100%; padding: 0.85rem; margin-top: 1rem; background: #312e81;">
+                        <i class="fa-solid fa-user-plus"></i> Complete Tenant Registration
+                    </button>
+                </form>
+            </div>
+
+            <!-- Login Redirect -->
+            <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    Already have a Tenant account? 
+                    <a href="{{ url_for('login', role='tenant') }}" style="font-weight: 700;">Login here &rarr;</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

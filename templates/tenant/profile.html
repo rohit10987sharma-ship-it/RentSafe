@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}My Lifestyle & Match Criteria - RentSafe{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 0 auto 3rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--secondary);">
+                My Tenant Profile & Criteria
+            </h1>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+                Owners set rules for pets, family/bachelor, and diet. Keep this updated to ensure accurate matching and chat eligibility.
+            </p>
+        </div>
+        <a href="{{ url_for('tenant_dashboard') }}" class="btn btn-sm btn-outline">
+            <i class="fa-solid fa-arrow-left"></i> Back to Flats
+        </a>
+    </div>
+
+    <div class="card">
+        <!-- Aadhaar Verified Badge -->
+        <div style="background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <strong style="color: #065f46;"><i class="fa-solid fa-id-card"></i> Aadhaar Identity Verified</strong>
+                <div style="font-size: 0.82rem; color: #047857;">UIDAI Masked ID: {{ tenant.aadhaar_number_masked }}</div>
+            </div>
+            <span class="badge-status badge-approved">Verified Tenant</span>
+        </div>
+
+        <form action="{{ url_for('tenant_profile') }}" method="POST">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="tenant_type"><i class="fa-solid fa-people-roof"></i> Tenant Category:</label>
+                    <select id="tenant_type" name="tenant_type" class="form-control">
+                        <option value="bachelor" {% if tenant.tenant_type == 'bachelor' %}selected{% endif %}>Bachelor / Working Professional</option>
+                        <option value="family" {% if tenant.tenant_type == 'family' %}selected{% endif %}>Family</option>
+                        <option value="female_tenant" {% if tenant.tenant_type == 'female_tenant' %}selected{% endif %}>Female Tenant Group / Solo</option>
+                        <option value="company_lease" {% if tenant.tenant_type == 'company_lease' %}selected{% endif %}>Corporate / Company Lease</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="diet_pref"><i class="fa-solid fa-utensils"></i> Dietary Preference:</label>
+                    <select id="diet_pref" name="diet_pref" class="form-control">
+                        <option value="no_preference" {% if tenant.diet_pref == 'no_preference' %}selected{% endif %}>No Preference / Both</option>
+                        <option value="veg" {% if tenant.diet_pref == 'veg' %}selected{% endif %}>Strictly Vegetarian</option>
+                        <option value="non_veg" {% if tenant.diet_pref == 'non_veg' %}selected{% endif %}>Non-Vegetarian</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="occupation"><i class="fa-solid fa-briefcase"></i> Occupation / Designation:</label>
+                    <input type="text" id="occupation" name="occupation" value="{{ tenant.occupation }}" class="form-control" placeholder="e.g. Senior Software Engineer">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="pet_details"><i class="fa-solid fa-dog"></i> Pet Details (if any):</label>
+                    <input type="text" id="pet_details" name="pet_details" value="{{ tenant.pet_details }}" class="form-control" placeholder="e.g. 1 Labrador, or leave blank">
+                </div>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 2.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                    <input type="checkbox" name="has_pets" value="1" style="width: 18px; height: 18px;" {% if tenant.has_pets %}checked{% endif %}>
+                    <span>I have pet(s)</span>
+                </label>
+
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                    <input type="checkbox" name="smoking_drinking" value="1" style="width: 18px; height: 18px;" {% if tenant.smoking_drinking %}checked{% endif %}>
+                    <span>Smoking / Drinking</span>
+                </label>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                <a href="{{ url_for('tenant_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Criteria
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

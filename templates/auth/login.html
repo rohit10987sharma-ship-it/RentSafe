@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Login Portal - RentSafe{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem;">
+                <i class="fa-solid fa-shield-halved"></i> RentSafe Portal Access
+            </h2>
+            <p style="font-size: 0.85rem; opacity: 0.85;">Select your designated portal to continue</p>
+        </div>
+
+        <!-- 4 Role Selector Tabs -->
+        <div class="role-tabs">
+            <a href="{{ url_for('login', role='owner') }}" class="role-tab-btn {% if selected_role == 'owner' %}active{% endif %}">
+                <i class="fa-solid fa-house-chimney-user"></i> Owner
+            </a>
+            <a href="{{ url_for('login', role='tenant') }}" class="role-tab-btn {% if selected_role == 'tenant' %}active{% endif %}">
+                <i class="fa-solid fa-user-check"></i> Tenant
+            </a>
+            <a href="{{ url_for('login', role='lawyer') }}" class="role-tab-btn {% if selected_role == 'lawyer' %}active{% endif %}">
+                <i class="fa-solid fa-scale-balanced"></i> Lawyer
+            </a>
+            <a href="{{ url_for('login', role='admin') }}" class="role-tab-btn {% if selected_role == 'admin' %}active{% endif %}">
+                <i class="fa-solid fa-lock"></i> Admin
+            </a>
+        </div>
+
+        <div style="padding: 2rem;">
+            <!-- Role Banner -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                <div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; text-transform: capitalize;">
+                        {{ selected_role }} Authentication
+                    </h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted);">
+                        {% if selected_role == 'owner' %}Manage your flats, deed status & tenant chats
+                        {% elif selected_role == 'tenant' %}Search verified properties & initiate requirement-checked chats
+                        {% elif selected_role == 'lawyer' %}Review and certify property deed submissions
+                        {% elif selected_role == 'admin' %}Platform control, lawyer generation & system settings
+                        {% endif %}
+                    </p>
+                </div>
+                <span class="role-tag {{ selected_role }}">{{ selected_role }}</span>
+            </div>
+
+            {% if selected_role == 'lawyer' %}
+                <div class="alert alert-info" style="font-size: 0.82rem; margin-bottom: 1.25rem;">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span><strong>Lawyer Notice:</strong> Lawyer IDs are generated exclusively by the Platform Admin. Log in with your assigned <strong>Lawyer ID</strong> (e.g. <code>LAW-2026-7841</code>) or email.</span>
+                </div>
+            {% endif %}
+
+            <form action="{{ url_for('login') }}" method="POST">
+                <input type="hidden" name="role" value="{{ selected_role }}">
+
+                <div class="form-group">
+                    <label class="form-label" for="identifier">
+                        {% if selected_role == 'lawyer' %}
+                            <i class="fa-solid fa-id-card"></i> Lawyer ID or Registered Email:
+                        {% else %}
+                            <i class="fa-solid fa-envelope"></i> Registered Email:
+                        {% endif %}
+                    </label>
+                    <input type="text" id="identifier" name="identifier" class="form-control" 
+                           placeholder="{% if selected_role == 'lawyer' %}e.g. LAW-2026-7841 or adv.rajesh@rentsafe.com{% else %}e.g. name@example.com{% endif %}" 
+                           required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <label class="form-label" for="password" style="margin-bottom: 0;">
+                            <i class="fa-solid fa-key"></i> Password:
+                        </label>
+                        {% if selected_role in ['tenant', 'owner'] %}
+                            <a href="{{ url_for('forgot_password_page', role=selected_role) }}" style="font-size: 0.82rem; color: var(--primary); font-weight: 600; text-decoration: none;">
+                                <i class="fa-solid fa-unlock-keyhole"></i> Forgot Password?
+                            </a>
+                        {% endif %}
+                    </div>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem; margin-top: 0.5rem;">
+                    <i class="fa-solid fa-right-to-bracket"></i> Log In to {{ selected_role | capitalize }} Portal
+                </button>
+            </form>
+
+            <!-- Registration Links (Only for Owner and Tenant) -->
+            <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+                {% if selected_role == 'owner' %}
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">
+                        New Flat Owner? 
+                        <a href="{{ url_for('register_owner_page') }}" style="font-weight: 700;">Create Owner Account &rarr;</a>
+                    </p>
+                {% elif selected_role == 'tenant' %}
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">
+                        Looking for a flat? 
+                        <a href="{{ url_for('register_tenant_page') }}" style="font-weight: 700;">Create Tenant Account &rarr;</a>
+                    </p>
+                {% elif selected_role == 'lawyer' %}
+                    <p style="font-size: 0.82rem; color: var(--text-muted);">
+                        Lawyer IDs cannot be registered publicly. <br>
+                        Contact <a href="mailto:admin@rentsafe.com">admin@rentsafe.com</a> for panel induction.
+                    </p>
+                {% elif selected_role == 'admin' %}
+                    <p style="font-size: 0.82rem; color: var(--text-muted);">
+                        RentSafe Master Security Gateway.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

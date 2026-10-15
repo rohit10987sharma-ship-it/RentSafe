@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RentSafe - Legal Property Rental & Verification Platform{% endblock %}</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Application Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Global Navigation -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo-link">
+                <i class="fa-solid fa-shield-halved" style="color: var(--primary); font-size: 1.4rem;"></i>
+                <span>RentSafe</span>
+                <span class="logo-badge">Legal Verified</span>
+            </a>
+
+            <nav>
+                <ul class="nav-links">
+                    <li class="nav-item"><a href="{{ url_for('index') }}"><i class="fa-solid fa-house"></i> Home</a></li>
+
+                    {% if current_user %}
+                        {% if current_user.role == 'owner' %}
+                            <li class="nav-item"><a href="{{ url_for('owner_dashboard') }}"><i class="fa-solid fa-building-user"></i> My Flats</a></li>
+                            <li class="nav-item"><a href="{{ url_for('owner_add_flat') }}" class="btn btn-sm btn-primary" style="color:white;"><i class="fa-solid fa-plus"></i> List Flat</a></li>
+                        {% elif current_user.role == 'tenant' %}
+                            <li class="nav-item"><a href="{{ url_for('tenant_dashboard') }}"><i class="fa-solid fa-magnifying-glass"></i> Browse Flats</a></li>
+                            <li class="nav-item"><a href="{{ url_for('tenant_profile') }}"><i class="fa-solid fa-sliders"></i> My Criteria</a></li>
+                        {% elif current_user.role == 'lawyer' %}
+                            <li class="nav-item"><a href="{{ url_for('lawyer_dashboard') }}"><i class="fa-solid fa-scale-balanced"></i> Deeds Review Queue</a></li>
+                        {% elif current_user.role == 'admin' %}
+                            <li class="nav-item"><a href="{{ url_for('admin_dashboard') }}"><i class="fa-solid fa-gauge-high"></i> Admin Control</a></li>
+                            <li class="nav-item"><a href="{{ url_for('admin_generate_lawyer') }}" class="btn btn-sm btn-primary" style="color:white;"><i class="fa-solid fa-user-plus"></i> Generate Lawyer ID</a></li>
+                        {% endif %}
+
+                        <li class="nav-item">
+                            <div class="user-badge-pill">
+                                <span><i class="fa-solid fa-circle-user"></i> {{ current_user.name }}</span>
+                                <span class="role-tag {{ current_user.role }}">{{ current_user.role }}</span>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('logout') }}" title="Logout" style="color: var(--danger);"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item"><a href="{{ url_for('login', role='owner') }}">Owner Portal</a></li>
+                        <li class="nav-item"><a href="{{ url_for('login', role='tenant') }}">Tenant Portal</a></li>
+                        <li class="nav-item"><a href="{{ url_for('login', role='lawyer') }}">Lawyer Portal</a></li>
+                        <li class="nav-item"><a href="{{ url_for('login', role='admin') }}">Admin Portal</a></li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('login') }}" class="btn btn-sm btn-primary" style="color: white;"><i class="fa-solid fa-lock"></i> Portal Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+        <!-- Flash Alerts -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alerts-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>
+                                {% if category == 'success' %}<i class="fa-solid fa-circle-check"></i>
+                                {% elif category == 'danger' %}<i class="fa-solid fa-triangle-exclamation"></i>
+                                {% elif category == 'warning' %}<i class="fa-solid fa-circle-exclamation"></i>
+                                {% else %}<i class="fa-solid fa-circle-info"></i>
+                                {% endif %}
+                                {{ message }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 <strong>RentSafe Technologies</strong> &bull; Indian Real Estate Deed Verification & Tenant Compatibility Ecosystem &bull; Aadhaar & Legal Deed Verified</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

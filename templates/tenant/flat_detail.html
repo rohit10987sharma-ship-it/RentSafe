@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ flat.title }} - RentSafe Verified Property{% endblock %}
+
+{% block content %}
+<div style="max-width: 980px; margin: 0 auto 3rem;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+        <a href="{{ url_for('tenant_dashboard') }}">&larr; Back to all verified flats</a> &bull; {{ flat.city }} &bull; {{ flat.flat_type }}
+    </div>
+
+    <!-- Title & Verification Status Header -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-size: 2rem; font-weight: 800; color: var(--secondary); margin-bottom: 0.35rem;">
+                {{ flat.title }}
+            </h1>
+            <p style="font-size: 0.92rem; color: var(--text-muted);">
+                <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i> {{ flat.address }}, {{ flat.city }} - {{ flat.pincode }}
+            </p>
+        </div>
+
+        <div>
+            <span class="badge-status badge-approved" style="font-size: 0.88rem; padding: 6px 14px;">
+                <i class="fa-solid fa-certificate"></i> Lawyer Deed Verified
+            </span>
+        </div>
+    </div>
+
+    <!-- Main Content Layout -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.75rem;">
+        
+        <!-- Left Column: Specs, Lawyer Certificate, Description -->
+        <div>
+            <!-- Property Hero Card -->
+            <div class="card" style="margin-bottom: 1.5rem; overflow: hidden; padding: 0;">
+                <div style="height: 320px; background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1000&q=80') center/cover; position: relative;">
+                    <div style="position: absolute; bottom: 16px; left: 16px; color: white;">
+                        <span style="font-size: 1.8rem; font-weight: 800;">₹{{ "{:,.0f}".format(flat.rent_monthly) }}</span>
+                        <span style="font-size: 0.95rem; opacity: 0.9;"> / month</span>
+                    </div>
+                </div>
+
+                <div style="padding: 1.5rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+                        <span class="spec-chip"><i class="fa-solid fa-bed"></i> {{ flat.flat_type }}</span>
+                        <span class="spec-chip"><i class="fa-solid fa-couch"></i> {{ flat.furnishing }}</span>
+                        <span class="spec-chip"><i class="fa-solid fa-shield-halved"></i> Security Deposit: ₹{{ "{:,.0f}".format(flat.deposit) }}</span>
+                    </div>
+
+                    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--secondary);">
+                        Property Overview
+                    </h3>
+                    <p style="font-size: 0.92rem; color: #475569; line-height: 1.6; margin-bottom: 1rem;">
+                        {{ flat.description or 'No additional description provided by owner.' }}
+                    </p>
+
+                    {% if flat.req_notes %}
+                        <div style="background: #f8fafc; border-left: 3px solid var(--primary); padding: 0.75rem 1rem; border-radius: 4px; font-size: 0.85rem;">
+                            <strong>Owner's House Notes:</strong> {{ flat.req_notes }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Certified Lawyer Deed Certificate Card -->
+            <div class="card" style="border: 2px solid #a7f3d0; background: #f0fdf4; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                            <h3 style="font-size: 1.15rem; font-weight: 700; color: #065f46;">
+                                Certified Legal Title & Deed Verification
+                            </h3>
+                            <span class="badge-status badge-approved" style="font-size: 0.72rem;">Clear Title</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: #047857; margin-bottom: 0.75rem;">
+                            The property deed document (<code>{{ flat.deed_original_name }}</code>) has been inspected and legally cleared by an official panel advocate appointed by RentSafe.
+                        </p>
+
+                        <div style="background: white; border: 1px solid #6ee7b7; border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 0.82rem; color: #1e293b; margin-bottom: 0.5rem;">
+                            <div><strong>Certifying Advocate:</strong> {{ flat.lawyer_name or 'Adv. Rajesh Sharma' }} (<span style="color: var(--primary); font-weight: 700;">{{ flat.lawyer_badge or 'LAW-2026-7841' }}</span>)</div>
+                            <div><strong>Bar Council Registration:</strong> {{ flat.bar_council_reg or 'State Bar Council Enrolled' }}</div>
+                            <div style="margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px dashed #e2e8f0; font-style: italic; color: #334155;">
+                                "{{ flat.lawyer_notes or 'Title verified as authentic. Freehold ownership confirmed without encumbrance.' }}"
+                            </div>
+                        </div>
+
+                        <div style="font-size: 0.75rem; color: #065f46; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-shield-check"></i> Owner Aadhaar Match: <strong>{{ flat.owner_name }}</strong> (UIDAI: {{ flat.owner_aadhaar }})
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Requirement Compatibility & In-App Chat Trigger -->
+        <div>
+            <!-- Requirement Compatibility Card -->
+            <div class="card" style="position: sticky; top: 90px;">
+                <div class="card-header" style="margin-bottom: 1rem; padding-bottom: 0.75rem;">
+                    <h3 class="card-title" style="font-size: 1.1rem;">
+                        <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary);"></i> Tenant Match Check
+                    </h3>
+                </div>
+
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Our engine compares your tenant profile against the owner's exact flat criteria:
+                </p>
+
+                <!-- Breakdown Checks -->
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+                    <!-- 1. Pet Check -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; padding: 0.5rem; background: #f8fafc; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-dog" style="color: #64748b;"></i>
+                            <span>Pet Policy:</span>
+                        </div>
+                        {% if compatibility.breakdown.pets.pass %}
+                            <span style="color: var(--success); font-weight: 700;"><i class="fa-solid fa-check"></i> Meets Criteria</span>
+                        {% else %}
+                            <span style="color: var(--danger); font-weight: 700;"><i class="fa-solid fa-xmark"></i> No Pets Allowed</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- 2. Tenant Category Check -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; padding: 0.5rem; background: #f8fafc; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-people-roof" style="color: #64748b;"></i>
+                            <span>Tenant Type:</span>
+                        </div>
+                        {% if compatibility.breakdown.tenant_type.pass %}
+                            <span style="color: var(--success); font-weight: 700;"><i class="fa-solid fa-check"></i> Category Accepted</span>
+                        {% else %}
+                            <span style="color: var(--danger); font-weight: 700;"><i class="fa-solid fa-xmark"></i> Families Only</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- 3. Food Preference -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; padding: 0.5rem; background: #f8fafc; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-utensils" style="color: #64748b;"></i>
+                            <span>Food / Diet:</span>
+                        </div>
+                        {% if compatibility.breakdown.food.pass %}
+                            <span style="color: var(--success); font-weight: 700;"><i class="fa-solid fa-check"></i> Compatible</span>
+                        {% else %}
+                            <span style="color: var(--danger); font-weight: 700;"><i class="fa-solid fa-xmark"></i> Veg Only</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- 4. Smoking Policy -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; padding: 0.5rem; background: #f8fafc; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-ban-smoking" style="color: #64748b;"></i>
+                            <span>Smoking / Alcohol:</span>
+                        </div>
+                        {% if compatibility.breakdown.smoking.pass %}
+                            <span style="color: var(--success); font-weight: 700;"><i class="fa-solid fa-check"></i> Compatible</span>
+                        {% else %}
+                            <span style="color: var(--danger); font-weight: 700;"><i class="fa-solid fa-xmark"></i> Strict Prohibition</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Overall Verdict & In-App Chat Action -->
+                <div style="border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+                    {% if compatibility.eligible %}
+                        <div style="background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: var(--radius-sm); padding: 0.75rem; text-align: center; margin-bottom: 1.25rem;">
+                            <div style="font-weight: 800; color: #065f46; font-size: 1rem;">
+                                <i class="fa-solid fa-circle-check"></i> Requirements Met! (100% Match)
+                            </div>
+                            <p style="font-size: 0.78rem; color: #047857; margin-top: 2px;">
+                                You satisfy all criteria set by {{ flat.owner_name }}.
+                            </p>
+                        </div>
+                    {% else %}
+                        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 0.75rem; text-align: center; margin-bottom: 1.25rem;">
+                            <div style="font-weight: 800; color: #92400e; font-size: 0.95rem;">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Criteria Note
+                            </div>
+                            <p style="font-size: 0.78rem; color: #b45309; margin-top: 2px;">
+                                Owner preferences: <strong>{{ compatibility.reasons | join('; ') }}</strong>.<br>
+                                You can still request this flat by adding an explanatory note below.
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    {% if existing_chat %}
+                        {% if existing_chat.status == 'APPROVED' %}
+                            <div style="background: #ecfdf5; border: 1px solid #6ee7b7; padding: 14px; border-radius: 8px; text-align: center; margin-bottom: 12px;">
+                                <strong style="color: #065f46; font-size: 1rem;"><i class="fa-solid fa-circle-check"></i> Request Approved by Owner!</strong>
+                                <p style="font-size: 0.8rem; color: #047857; margin: 4px 0 12px;">You are approved to chat directly with {{ flat.owner_name }}.</p>
+                                <a href="{{ url_for('view_chat', chat_id=existing_chat.id) }}" class="btn btn-success" style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 700;">
+                                    <i class="fa-solid fa-comments"></i> Open In-App Chat
+                                </a>
+                            </div>
+                        {% elif existing_chat.status == 'PENDING_OWNER_APPROVAL' %}
+                            <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 14px; border-radius: 8px; text-align: center; margin-bottom: 12px;">
+                                <strong style="color: #92400e; font-size: 1rem;"><i class="fa-solid fa-hourglass-half"></i> Request Sent - Awaiting Owner Approval</strong>
+                                <p style="font-size: 0.8rem; color: #b45309; margin: 4px 0 12px;">
+                                    Your request has been submitted to {{ flat.owner_name }}. In-app chat will unlock as soon as the owner approves!
+                                </p>
+                                <a href="{{ url_for('view_chat', chat_id=existing_chat.id) }}" class="btn btn-outline" style="width: 100%; padding: 0.75rem; font-weight: 600;">
+                                    <i class="fa-solid fa-clock-rotate-left"></i> View Request Status
+                                </a>
+                            </div>
+                        {% elif existing_chat.status == 'REJECTED' %}
+                            <div style="background: #fef2f2; border: 1px solid #fca5a5; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 12px;">
+                                <strong style="color: #991b1b;"><i class="fa-solid fa-circle-xmark"></i> Request Declined by Owner</strong>
+                                <p style="font-size: 0.78rem; color: #b91c1c; margin: 4px 0 0;">The owner declined this rental request. You may re-submit with an updated note below.</p>
+                            </div>
+                            <!-- Allow re-submitting request -->
+                            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem;">
+                                <label class="form-label" for="request-intro-note" style="font-size: 0.85rem; font-weight: 600;">
+                                    <i class="fa-solid fa-envelope-open-text"></i> Updated Note for Owner:
+                                </label>
+                                <textarea id="request-intro-note" class="form-control" rows="2" placeholder="e.g. Hello, I would love to re-request to visit..." style="font-size: 0.85rem; margin-bottom: 0.75rem;"></textarea>
+                                
+                                <button type="button" id="btn-send-tenant-request" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 700;">
+                                    <i class="fa-solid fa-paper-plane"></i> Re-send Rental & Chat Request
+                                </button>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <!-- Request Form for Tenant (Always Visible!) -->
+                        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem;">
+                            <label class="form-label" for="request-intro-note" style="font-size: 0.85rem; font-weight: 600;">
+                                <i class="fa-solid fa-envelope-open-text"></i> Message / Visit Request Note (Optional):
+                            </label>
+                            <textarea id="request-intro-note" class="form-control" rows="2" placeholder="e.g. Hello! I love the flat and would like to schedule a visit. When are you free?" style="font-size: 0.85rem; margin-bottom: 0.75rem;"></textarea>
+                            
+                            <button type="button" id="btn-send-tenant-request" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 1rem; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.25);">
+                                <i class="fa-solid fa-paper-plane"></i> Send Rental & Chat Request to Owner
+                            </button>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin: 8px 0 0;">
+                                <i class="fa-solid fa-shield"></i> In-app chat will unlock automatically upon owner's approval.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnSendReq = document.getElementById('btn-send-tenant-request');
+    if (btnSendReq) {
+        btnSendReq.addEventListener('click', async function() {
+            const noteInput = document.getElementById('request-intro-note');
+            const introNote = noteInput ? noteInput.value.trim() : '';
+
+            btnSendReq.disabled = true;
+            btnSendReq.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Request...';
+
+            try {
+                const res = await fetch('/api/chat/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        property_id: {{ flat.id }},
+                        intro_note: introNote
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success && data.redirect_url) {
+                    alert(data.message || 'Request submitted successfully!');
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert(data.error || 'Could not send request.');
+                    btnSendReq.disabled = false;
+                    btnSendReq.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Rental & Chat Request to Owner';
+                }
+            } catch (err) {
+                alert('Network error submitting request.');
+                btnSendReq.disabled = false;
+                btnSendReq.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Rental & Chat Request to Owner';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

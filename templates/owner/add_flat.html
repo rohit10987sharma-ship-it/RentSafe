@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}List New Flat - RentSafe{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 0 auto 3rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--secondary);">
+                List Your Property
+            </h1>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+                Provide flat details, set your pet & lifestyle criteria, and submit your property deed for lawyer certification.
+            </p>
+        </div>
+        <a href="{{ url_for('owner_dashboard') }}" class="btn btn-sm btn-outline">
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card">
+        <form action="{{ url_for('owner_add_flat') }}" method="POST" enctype="multipart/form-data">
+            
+            <!-- Section 1: Basic Flat Details -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">1</span>
+                    Flat Details & Pricing
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label" for="title">Listing Title:</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="e.g. Spacious 2 BHK with Balcony at Sea Breeze Towers" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="flat_type">Flat Type:</label>
+                        <select id="flat_type" name="flat_type" class="form-control" required>
+                            <option value="1 RK">1 RK / Studio</option>
+                            <option value="1 BHK">1 BHK</option>
+                            <option value="2 BHK" selected>2 BHK</option>
+                            <option value="3 BHK">3 BHK</option>
+                            <option value="4+ BHK">4+ BHK / Penthouse</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="furnishing">Furnishing Status:</label>
+                        <select id="furnishing" name="furnishing" class="form-control" required>
+                            <option value="Fully Furnished">Fully Furnished</option>
+                            <option value="Semi-Furnished" selected>Semi-Furnished</option>
+                            <option value="Unfurnished">Unfurnished</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="rent_monthly">Expected Monthly Rent (₹):</label>
+                        <input type="number" id="rent_monthly" name="rent_monthly" class="form-control" placeholder="e.g. 45000" min="1000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="deposit">Security Deposit (₹):</label>
+                        <input type="number" id="deposit" name="deposit" class="form-control" placeholder="e.g. 150000" min="1000" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="description">Detailed Property Description:</label>
+                    <textarea id="description" name="description" class="form-control" rows="3" placeholder="Describe flat features, society amenities, nearby transport, etc."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="form-label" for="address">Full Address (Flat No, Building, Street):</label>
+                        <input type="text" id="address" name="address" class="form-control" placeholder="e.g. Flat 802, Wing C, Palm Grove CHS, SV Road" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="city">City:</label>
+                        <input type="text" id="city" name="city" class="form-control" placeholder="e.g. Mumbai" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="pincode">Pincode:</label>
+                        <input type="text" id="pincode" name="pincode" class="form-control" placeholder="e.g. 400050">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Owner Preferences & Requirements -->
+            <div style="margin-bottom: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 28px; height: 28px; border-radius: 50%; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">2</span>
+                    Owner Requirements & Criteria (Used for Tenant Matching)
+                </h3>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                    Tenants will only be allowed to initiate in-app chat if they satisfy your selected criteria.
+                </p>
+
+                <div class="form-row">
+                    <!-- Pet Policy -->
+                    <div class="form-group">
+                        <label class="form-label" for="req_pets"><i class="fa-solid fa-dog"></i> Pet Policy:</label>
+                        <select id="req_pets" name="req_pets" class="form-control" required>
+                            <option value="not_allowed">Strictly No Pets Allowed</option>
+                            <option value="allowed">Pets Welcomed</option>
+                            <option value="conditional">Small Pets Allowed on Condition</option>
+                        </select>
+                    </div>
+
+                    <!-- Tenant Type Preference -->
+                    <div class="form-group">
+                        <label class="form-label" for="req_tenant_type"><i class="fa-solid fa-people-roof"></i> Tenant Preference:</label>
+                        <select id="req_tenant_type" name="req_tenant_type" class="form-control" required>
+                            <option value="open_to_all">Open to All (Families & Bachelors)</option>
+                            <option value="family_only">Families Only</option>
+                            <option value="bachelors_allowed">Working Bachelors Allowed</option>
+                            <option value="female_only">Female Tenants Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- Food Preference -->
+                    <div class="form-group">
+                        <label class="form-label" for="req_food"><i class="fa-solid fa-utensils"></i> Food Preference:</label>
+                        <select id="req_food" name="req_food" class="form-control" required>
+                            <option value="no_restriction">No Restriction (Veg & Non-Veg)</option>
+                            <option value="veg_only">Strictly Vegetarian Only</option>
+                            <option value="non_veg_allowed">Non-Veg Cooking Allowed</option>
+                        </select>
+                    </div>
+
+                    <!-- Smoking/Alcohol -->
+                    <div class="form-group">
+                        <label class="form-label" for="req_smoking_drinking"><i class="fa-solid fa-ban-smoking"></i> Smoking & Alcohol:</label>
+                        <select id="req_smoking_drinking" name="req_smoking_drinking" class="form-control" required>
+                            <option value="prohibited">Strictly Prohibited on Premises</option>
+                            <option value="outdoor_only">Outdoor / Balcony Only</option>
+                            <option value="no_restriction">No Specific Restriction</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="req_notes">Additional House Rules / Tenant Notes:</label>
+                    <input type="text" id="req_notes" name="req_notes" class="form-control" placeholder="e.g. Quiet hours after 10 PM; parking slot included.">
+                </div>
+            </div>
+
+            <!-- Section 3: Legal Property Deed Document (MANDATORY) -->
+            <div style="margin-bottom: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: #b45309; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 28px; height: 28px; border-radius: 50%; background: #fffbeb; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;"><i class="fa-solid fa-scale-balanced"></i></span>
+                    Property Title Deed Upload (Mandatory for Lawyer Verification)
+                </h3>
+                
+                <div class="alert alert-warning" style="margin-bottom: 1.25rem;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <div>
+                        <strong>Legal Verification Pipeline:</strong> Every listed flat must provide an authentic Registered Sale Deed / Khata / Conveyance Deed. It will be routed directly to an Admin-appointed panel Lawyer for legal verification. Your flat will be published only after lawyer sign-off.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="deed_document">
+                        <i class="fa-solid fa-file-pdf"></i> Upload Title Deed Document (PDF, JPG, PNG):
+                    </label>
+                    <input type="file" id="deed_document" name="deed_document" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.webp" required>
+                    <small style="color: var(--text-muted); font-size: 0.78rem;">Upload the registered deed copy clearly displaying ownership matching your Aadhaar name.</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="property_image">
+                        <i class="fa-solid fa-image"></i> Flat Photograph (Optional):
+                    </label>
+                    <input type="file" id="property_image" name="property_image" class="form-control" accept=".png,.jpg,.jpeg,.webp">
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                <a href="{{ url_for('owner_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="padding: 0.8rem 2rem;">
+                    <i class="fa-solid fa-paper-plane"></i> Submit Flat for Lawyer Verification
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

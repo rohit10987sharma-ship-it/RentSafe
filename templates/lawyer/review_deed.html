@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Deed Legal Review - {{ flat.title }} - RentSafe{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto 3rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+        <div>
+            <span class="role-tag lawyer" style="margin-bottom: 0.4rem; display: inline-block;">Official Legal Clearance</span>
+            <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--secondary);">
+                Property Deed Verification
+            </h1>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+                Lawyer ID: <strong>{{ current_user.lawyer_id }}</strong> &bull; Advocate: <strong>{{ current_user.name }}</strong>
+            </p>
+        </div>
+        <a href="{{ url_for('lawyer_dashboard') }}" class="btn btn-sm btn-outline">
+            <i class="fa-solid fa-arrow-left"></i> Back to Review Queue
+        </a>
+    </div>
+
+    <!-- Property & Owner Summary Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <!-- Property Details Card -->
+        <div class="card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--secondary); display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-building" style="color: var(--primary);"></i> Property Particulars
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.88rem;">
+                <div><strong>Title:</strong> {{ flat.title }}</div>
+                <div><strong>Flat Type:</strong> {{ flat.flat_type }} ({{ flat.furnishing }})</div>
+                <div><strong>Address:</strong> {{ flat.address }}, {{ flat.city }} - {{ flat.pincode }}</div>
+                <div><strong>Monthly Rent:</strong> ₹{{ "{:,.0f}".format(flat.rent_monthly) }}</div>
+                <div><strong>Security Deposit:</strong> ₹{{ "{:,.0f}".format(flat.deposit) }}</div>
+                <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border-color); font-size: 0.82rem; color: var(--text-muted);">
+                    <strong>Owner Requirements:</strong> Pets: {{ flat.req_pets | capitalize }}, Tenant: {{ flat.req_tenant_type | replace('_', ' ') | capitalize }}, Food: {{ flat.req_food | capitalize }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Owner Aadhaar Identity Card -->
+        <div class="card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--secondary); display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-id-card" style="color: var(--success);"></i> Owner Identity & Aadhaar Check
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem;">
+                <div><strong>Claimed Owner:</strong> {{ flat.owner_name }}</div>
+                <div><strong>Email:</strong> {{ flat.owner_email }}</div>
+                <div><strong>Contact Phone:</strong> {{ flat.owner_phone or 'Not provided' }}</div>
+                
+                <div style="background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: var(--radius-sm); padding: 0.75rem; margin-top: 0.5rem;">
+                    <div style="font-weight: 700; color: #065f46; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-circle-check"></i> Aadhaar Identity Verified via UIDAI OTP
+                    </div>
+                    <div style="font-size: 0.85rem; font-family: monospace; color: #065f46; margin-top: 2px;">
+                        Masked UIDAI ID: <strong>{{ flat.aadhaar_number_masked }}</strong>
+                    </div>
+                    <small style="color: #047857; font-size: 0.75rem;">Verified identity matches account owner.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submitted Title Deed Document Viewer -->
+    <div class="card" style="margin-bottom: 1.5rem; border: 2px solid #fed7aa;">
+        <div class="card-header" style="background: #fffbeb; margin: -1.5rem -1.5rem 1rem -1.5rem; padding: 1.25rem 1.5rem; border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg);">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fa-solid fa-file-contract" style="color: #b45309; font-size: 1.5rem;"></i>
+                <div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: #92400e;">Submitted Deed Document</h3>
+                    <p style="font-size: 0.82rem; color: #b45309;">Uploaded document: <strong>{{ flat.deed_original_name }}</strong></p>
+                </div>
+            </div>
+            <a href="{{ url_for('serve_deed', filename=flat.deed_filename) }}" target="_blank" class="btn btn-sm btn-primary" style="background: #b45309; border-color: #b45309;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Open In New Tab
+            </a>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Click below to inspect the deed file contents, check stamp duty registration number, and ensure ownership continuity.
+            </p>
+            <a href="{{ url_for('serve_deed', filename=flat.deed_filename) }}" target="_blank" class="btn btn-outline">
+                <i class="fa-solid fa-file-pdf"></i> Inspect Deed Document ({{ flat.deed_original_name }})
+            </a>
+        </div>
+    </div>
+
+    <!-- Official Verdict Form -->
+    <div class="card" style="border-top: 4px solid var(--primary);">
+        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem;">
+            <i class="fa-solid fa-gavel"></i> Advocate Legal Decision & Certification
+        </h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+            Your legal remarks and Advocate ID will be permanently affixed to this flat listing once certified.
+        </p>
+
+        <form action="{{ url_for('lawyer_review_deed', property_id=flat.id) }}" method="POST">
+            <div class="form-group">
+                <label class="form-label" for="lawyer_notes">Advocate Legal Notes / Verification Certificate Remarks:</label>
+                <textarea id="lawyer_notes" name="lawyer_notes" class="form-control" rows="3" placeholder="e.g. Registered Sale Deed inspected. Freehold title and Sub-Registrar stamp confirmed under owner Vikramaditya Singhania. Encumbrance clear." required></textarea>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="submit" name="action" value="REJECT" class="btn btn-danger" onclick="return confirm('Are you sure you want to reject this deed? The flat will not be published.');">
+                    <i class="fa-solid fa-xmark"></i> Reject Deed
+                </button>
+                <button type="submit" name="action" value="APPROVE" class="btn btn-success" style="padding: 0.75rem 2rem;" onclick="return confirm('Confirm legal approval? This flat will be immediately published to tenants with your Advocate verification badge.');">
+                    <i class="fa-solid fa-shield-check"></i> Certify & Approve Deed
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

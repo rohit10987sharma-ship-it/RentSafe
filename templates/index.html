@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}RentSafe - Secure Legal Rental & Deed Verification Platform{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 3rem 1rem 2rem;">
+    <span class="badge-status badge-approved" style="margin-bottom: 1rem; font-size: 0.85rem; padding: 6px 14px;">
+        <i class="fa-solid fa-certificate"></i> India's 1st Lawyer-Verified Rental Platform
+    </span>
+    <h1 style="font-size: 2.75rem; font-weight: 800; color: var(--secondary); letter-spacing: -1px; margin-bottom: 1rem;">
+        Rent Without Doubts. <br><span style="color: var(--primary);">Verified Deeds & Compatible Matches.</span>
+    </h1>
+    <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 720px; margin: 0 auto 2.5rem;">
+        A comprehensive ecosystem connecting Owners, Tenants, and Certified Legal Advocates. Real email OTP authentication, Aadhaar identity check, mandatory property deed verification, and requirement-matched in-app chat.
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <a href="{{ url_for('login', role='tenant') }}" class="btn btn-primary" style="padding: 0.8rem 1.75rem; font-size: 1rem;">
+            <i class="fa-solid fa-magnifying-glass"></i> Browse Verified Flats
+        </a>
+        <a href="{{ url_for('register_owner_page') }}" class="btn btn-outline" style="padding: 0.8rem 1.75rem; font-size: 1rem;">
+            <i class="fa-solid fa-house-chimney-user"></i> List Your Property
+        </a>
+    </div>
+</div>
+
+<!-- Recent Lawyer-Verified Listings (Featured Verified Properties Moved Upward) -->
+<div style="margin-bottom: 3rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+        <div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--secondary);">
+                <i class="fa-solid fa-certificate" style="color: var(--primary);"></i> Featured Verified Properties
+            </h2>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">Flats with approved deeds and legal title validation</p>
+        </div>
+        <a href="{{ url_for('login', role='tenant') }}" class="btn btn-sm btn-outline">View All Listings <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <div class="properties-grid">
+        {% for flat in recent_flats %}
+            <div class="property-card">
+                <div class="property-image" style="background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80') center/cover;">
+                    <span class="deed-verified-badge">
+                        <i class="fa-solid fa-certificate"></i> Deed Verified by Lawyer
+                    </span>
+                </div>
+                <div class="property-body">
+                    <div class="property-rent">₹{{ "{:,.0f}".format(flat.rent_monthly) }} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/ month</span></div>
+                    <h3 class="property-title">{{ flat.title }}</h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                        <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i> {{ flat.address }}, {{ flat.city }}
+                    </p>
+                    <div class="property-specs">
+                        <span class="spec-chip"><i class="fa-solid fa-bed"></i> {{ flat.flat_type }}</span>
+                        <span class="spec-chip"><i class="fa-solid fa-couch"></i> {{ flat.furnishing }}</span>
+                        <span class="spec-chip"><i class="fa-solid fa-paw"></i> Pets: {{ flat.req_pets | replace('_', ' ') | capitalize }}</span>
+                    </div>
+                    <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">Owner: <strong>{{ flat.owner_name }}</strong></span>
+                        <a href="{{ url_for('login', role='tenant') }}" class="btn btn-sm btn-primary">Check Compatibility</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                <i class="fa-regular fa-folder-open" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                <p>No verified properties listed yet. Owners can list and submit deeds for verification!</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Workflow Highlights -->
+<div class="card" style="margin-bottom: 3rem; background: linear-gradient(135deg, #ffffff, #f8fafc);">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--secondary);">Why RentSafe is 100% Reliable</h2>
+        <p style="color: var(--text-muted);">How our verification and matching pipeline safeguards owners and tenants</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+        <div style="text-align: center; padding: 1rem;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
+                <i class="fa-solid fa-envelope-circle-check"></i>
+            </div>
+            <h4 style="font-weight: 700; margin-bottom: 0.5rem;">Real Email OTP</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                OTP codes are dispatched via real SMTP mail directly to your inbox. No codes exposed on dashboard!
+            </p>
+        </div>
+
+        <div style="text-align: center; padding: 1rem;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #ecfdf5; color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
+                <i class="fa-solid fa-id-card"></i>
+            </div>
+            <h4 style="font-weight: 700; margin-bottom: 0.5rem;">Aadhaar Verification</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                12-digit Indian Aadhaar validation with linked mobile OTP identity authentication for every owner and tenant.
+            </p>
+        </div>
+
+        <div style="text-align: center; padding: 1rem;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #fffbeb; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
+                <i class="fa-solid fa-file-contract"></i>
+            </div>
+            <h4 style="font-weight: 700; margin-bottom: 0.5rem;">Lawyer Deed Check</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                Mandatory property deed upload. Lawyers generated exclusively by Admin examine title authenticity before public display.
+            </p>
+        </div>
+
+        <div style="text-align: center; padding: 1rem;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #fdf2f8; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
+                <i class="fa-solid fa-comments"></i>
+            </div>
+            <h4 style="font-weight: 700; margin-bottom: 0.5rem;">Matched In-App Chat</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                Tenants can chat with owners only if pet, diet, family/bachelor, and house requirements match!
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

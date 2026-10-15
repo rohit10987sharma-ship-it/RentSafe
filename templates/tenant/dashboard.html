@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Verified Flats - Tenant Portal - RentSafe{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <!-- Welcome Header & Tenant Profile Quick Summary -->
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--secondary);">
+                Browse Verified Rental Homes
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                All properties displayed here have verified legal deeds inspected by certified panel advocates.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <a href="{{ url_for('tenant_profile') }}" class="btn btn-sm btn-outline">
+                <i class="fa-solid fa-sliders"></i> Edit My Lifestyle Criteria
+            </a>
+            <span class="badge-status badge-approved">
+                <i class="fa-solid fa-shield-check"></i> Aadhaar: {{ tenant.aadhaar_number_masked }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Tenant Profile Pill Card -->
+    <div class="card" style="background: #f8fafc; border: 1px solid var(--border-color); padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem;">
+                <span style="font-weight: 700; color: var(--secondary);"><i class="fa-solid fa-user-check"></i> Your Match Profile:</span>
+                <span>Category: <strong>{{ tenant.tenant_type | replace('_', ' ') | capitalize }}</strong></span>
+                <span>Pets: <strong>{% if tenant.has_pets %}Yes ({{ tenant.pet_details or 'Pets' }}){% else %}No Pets{% endif %}</strong></span>
+                <span>Diet: <strong>{{ tenant.diet_pref | replace('_', ' ') | capitalize }}</strong></span>
+                <span>Smoking: <strong>{% if tenant.smoking_drinking %}Yes{% else %}No{% endif %}</strong></span>
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-wand-magic-sparkles"></i> Automatic Compatibility Evaluator Active</span>
+        </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="card" style="margin-bottom: 2rem; padding: 1.25rem;">
+        <form method="GET" action="{{ url_for('tenant_dashboard') }}">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.75rem; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;"><i class="fa-solid fa-magnifying-glass"></i> Search Keyword / Location:</label>
+                    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search by society, locality, or city...">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;"><i class="fa-solid fa-bed"></i> Flat Type:</label>
+                    <select name="flat_type" class="form-control">
+                        <option value="">All BHK Types</option>
+                        <option value="1 RK" {% if selected_bhk == '1 RK' %}selected{% endif %}>1 RK</option>
+                        <option value="1 BHK" {% if selected_bhk == '1 BHK' %}selected{% endif %}>1 BHK</option>
+                        <option value="2 BHK" {% if selected_bhk == '2 BHK' %}selected{% endif %}>2 BHK</option>
+                        <option value="3 BHK" {% if selected_bhk == '3 BHK' %}selected{% endif %}>3 BHK</option>
+                        <option value="4+ BHK" {% if selected_bhk == '4+ BHK' %}selected{% endif %}>4+ BHK</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;"><i class="fa-solid fa-city"></i> City:</label>
+                    <input type="text" name="city" value="{{ selected_city }}" class="form-control" placeholder="e.g. Mumbai">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;"><i class="fa-solid fa-indian-rupee-sign"></i> Max Rent (₹):</label>
+                    <input type="number" name="max_rent" value="{{ max_rent }}" class="form-control" placeholder="e.g. 60000">
+                </div>
+
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.25rem;">Filter</button>
+                    <a href="{{ url_for('tenant_dashboard') }}" class="btn btn-secondary" title="Reset Filters"><i class="fa-solid fa-rotate-left"></i></a>
+                </div>
+            </div>
+
+            <div style="margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">
+                <input type="checkbox" name="match_only" value="1" id="match_only" {% if match_only == '1' %}checked{% endif %} onchange="this.form.submit()">
+                <label for="match_only" style="cursor: pointer; font-weight: 600; color: #1e40af;">
+                    <i class="fa-solid fa-filter"></i> Only show flats where my profile meets 100% of owner's criteria
+                </label>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Main Split: Flats Grid vs Active Chats -->
+<div style="display: grid; grid-template-columns: 2.2fr 1fr; gap: 1.5rem; align-items: start;">
+    
+    <!-- Properties Grid -->
+    <div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+            <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--secondary);">
+                Verified Available Properties ({{ flats | length }})
+            </h2>
+        </div>
+
+        {% if flats %}
+            <div class="properties-grid" style="grid-template-columns: 1fr;">
+                {% for flat in flats %}
+                    <div class="property-card" style="flex-direction: row; min-height: 220px;">
+                        <!-- Property Image / Placeholder -->
+                        <div class="property-image" style="width: 260px; min-height: 100%; flex-shrink: 0; background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80') center/cover;">
+                            <span class="deed-verified-badge" style="top: 10px; left: 10px;">
+                                <i class="fa-solid fa-certificate"></i> Lawyer Deed Verified
+                            </span>
+                        </div>
+
+                        <!-- Property Details & Compatibility Assessment -->
+                        <div class="property-body" style="padding: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <div class="property-rent">₹{{ "{:,.0f}".format(flat.rent_monthly) }} <span style="font-size: 0.82rem; font-weight: 500; color: var(--text-muted);">/ month</span></div>
+                                    <h3 class="property-title">{{ flat.title }}</h3>
+                                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                                        <i class="fa-solid fa-location-dot"></i> {{ flat.address }}, {{ flat.city }}
+                                    </p>
+                                </div>
+
+                                <!-- Compatibility Badge -->
+                                <div>
+                                    {% if flat.compatibility.eligible %}
+                                        <span class="badge-status badge-approved" style="font-size: 0.78rem;">
+                                            <i class="fa-solid fa-circle-check"></i> {{ flat.compatibility.score }}% Match (Eligible to Chat)
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-status badge-rejected" style="font-size: 0.78rem;" title="{{ flat.compatibility.reasons | join(', ') }}">
+                                            <i class="fa-solid fa-circle-xmark"></i> Criteria Mismatch
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="property-specs">
+                                <span class="spec-chip"><i class="fa-solid fa-bed"></i> {{ flat.flat_type }}</span>
+                                <span class="spec-chip"><i class="fa-solid fa-couch"></i> {{ flat.furnishing }}</span>
+                                <span class="spec-chip"><i class="fa-solid fa-paw"></i> Pets: {{ flat.req_pets | replace('_', ' ') | capitalize }}</span>
+                                <span class="spec-chip"><i class="fa-solid fa-people-roof"></i> {{ flat.req_tenant_type | replace('_', ' ') | capitalize }}</span>
+                            </div>
+
+                            <!-- Criteria feedback snippet -->
+                            {% if not flat.compatibility.eligible %}
+                                <div style="font-size: 0.78rem; color: #991b1b; background: #fef2f2; border-left: 3px solid #ef4444; padding: 4px 8px; border-radius: 4px; margin-bottom: 0.5rem;">
+                                    <strong>Mismatch:</strong> {{ flat.compatibility.reasons | join('; ') }}
+                                </div>
+                            {% endif %}
+
+                            <div style="margin-top: auto; padding-top: 0.75rem; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                                <div style="font-size: 0.78rem; color: #065f46;">
+                                    <i class="fa-solid fa-scale-balanced"></i> Verified by: <strong>{{ flat.lawyer_name or 'Panel Advocate' }}</strong>
+                                </div>
+
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a href="{{ url_for('tenant_flat_detail', flat_id=flat.id) }}" class="btn btn-sm btn-primary" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600;">
+                                        <i class="fa-solid fa-paper-plane"></i> Send Rental & Chat Request &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 3rem;">
+                <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
+                <h3 style="font-size: 1.15rem; font-weight: 700;">No properties match your filter</h3>
+                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Try resetting filters or expanding your search criteria.
+                </p>
+                <a href="{{ url_for('tenant_dashboard') }}" class="btn btn-sm btn-outline">Clear All Filters</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Tenant Chats Inbox Sidebar -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title"><i class="fa-solid fa-comments"></i> My In-App Chats</h2>
+            <span class="role-tag tenant">{{ chats | length }}</span>
+        </div>
+
+        {% if chats %}
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for chat in chats %}
+                    <a href="{{ url_for('view_chat', chat_id=chat.id) }}" style="text-decoration: none; color: inherit;">
+                        <div style="border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.9rem; background: #ffffff; transition: background 0.15s ease;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                                <strong style="font-size: 0.92rem; color: var(--secondary);">Owner: {{ chat.owner_name }}</strong>
+                                {% if chat.unread_count > 0 %}
+                                    <span style="background: var(--danger); color: white; border-radius: 9999px; padding: 2px 7px; font-size: 0.7rem; font-weight: 700;">
+                                        {{ chat.unread_count }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div style="font-size: 0.78rem; color: var(--primary); font-weight: 600; margin-bottom: 0.35rem;">
+                                {{ chat.flat_title }}
+                            </div>
+                            <p style="font-size: 0.82rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.4rem;">
+                                {{ chat.last_message or 'Chat active' }}
+                            </p>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #94a3b8;">
+                                <span><i class="fa-solid fa-certificate"></i> Verified Owner</span>
+                                <span>{{ chat.last_message_time or '' }}</span>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem 1rem;">
+                <i class="fa-regular fa-comment-dots" style="font-size: 2.2rem; color: #cbd5e1; margin-bottom: 0.75rem;"></i>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    When you view a flat where you meet owner requirements, you can start a direct chat.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

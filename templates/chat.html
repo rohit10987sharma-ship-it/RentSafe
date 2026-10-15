@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Chat - {{ chat.flat_title }} - RentSafe{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto 2rem;">
+    <!-- Top Context Header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+        <div>
+            <a href="{{ url_for('owner_dashboard' if session.get('role') == 'owner' else 'tenant_dashboard') }}" class="btn btn-sm btn-outline">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-lock" style="color: var(--success);"></i>
+            <span>End-to-End Verified In-App Channel</span>
+        </div>
+    </div>
+
+    <!-- Chat Container -->
+    <div id="chat-window-box" class="card" data-chat-id="{{ chat.id }}" style="padding: 0; overflow: hidden; height: 640px; display: flex; flex-direction: column;">
+        
+        <!-- Chat Header -->
+        <div class="chat-header" style="background: #ffffff; border-bottom: 1px solid var(--border-color); padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--secondary); margin: 0;">
+                            {{ other_party.name }}
+                        </h3>
+                        <span class="role-tag {{ other_party.role | lower }}">{{ other_party.role }}</span>
+                    </div>
+                    <div style="font-size: 0.78rem; color: #059669; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                        <i class="fa-solid fa-shield-check"></i> Aadhaar: {{ other_party.masked_aadhaar }} (UIDAI Verified)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Context Pill -->
+            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.4rem 0.85rem; text-align: right;">
+                <div style="font-weight: 700; font-size: 0.82rem; color: var(--secondary);">
+                    {{ chat.flat_title }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600;">
+                    ₹{{ "{:,.0f}".format(chat.rent_monthly) }} / month &bull; {{ chat.city }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Approval Status Banners -->
+        {% if chat.status == 'PENDING_OWNER_APPROVAL' %}
+            {% if session.get('role') == 'owner' %}
+                <div style="background: #fffdf5; border-bottom: 2px solid #fde68a; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 700; color: #92400e; font-size: 0.95rem;">
+                            <i class="fa-solid fa-bell"></i> Tenant Connection Request Awaiting Your Approval
+                        </div>
+                        <div style="font-size: 0.82rem; color: #b45309; margin-top: 2px;">
+                            {{ chat.tenant_name }} meets all rules for {{ chat.flat_title }}. Approve to unlock direct chat.
+                        </div>
+                        {% if chat.request_message %}
+                            <div style="font-size: 0.8rem; color: #334155; margin-top: 4px; font-style: italic;">
+                                "{{ chat.request_message }}"
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button type="button" id="btn-owner-approve" class="btn btn-sm btn-success" style="padding: 0.5rem 1rem;">
+                            <i class="fa-solid fa-check"></i> Approve & Allow Chat
+                        </button>
+                        <button type="button" id="btn-owner-decline" class="btn btn-sm btn-danger" style="padding: 0.5rem 0.85rem;">
+                            <i class="fa-solid fa-xmark"></i> Decline
+                        </button>
+                    </div>
+                </div>
+            {% else %}
+                <div style="background: #fffbeb; border-bottom: 1px solid #fde68a; padding: 0.75rem 1.5rem; font-size: 0.85rem; color: #92400e; display: flex; align-items: center; justify-content: space-between;">
+                    <span><i class="fa-solid fa-hourglass-half"></i> <strong>Request Sent:</strong> Waiting for {{ chat.owner_name }} to accept. Chat unlocks automatically upon approval.</span>
+                    <span class="badge-status badge-pending">Pending Approval</span>
+                </div>
+            {% endif %}
+        {% elif chat.status == 'APPROVED' %}
+            <div style="background: #f0fdf4; border-bottom: 1px solid #bbf7d0; padding: 0.5rem 1.5rem; font-size: 0.78rem; color: #166534; display: flex; align-items: center; justify-content: space-between;">
+                <span><i class="fa-solid fa-circle-check"></i> Connected & Approved: You can now chat directly regarding visits and lease terms.</span>
+                <span><i class="fa-solid fa-scale-balanced"></i> Deed Verified by Panel Lawyer</span>
+            </div>
+        {% elif chat.status == 'REJECTED' %}
+            <div style="background: #fef2f2; border-bottom: 1px solid #fca5a5; padding: 0.75rem 1.5rem; font-size: 0.85rem; color: #991b1b;">
+                <i class="fa-solid fa-ban"></i> This rental request was declined by the owner.
+            </div>
+        {% endif %}
+
+        <!-- Messages Flow Area -->
+        <div id="chat-messages-container" class="chat-messages" style="flex: 1; overflow-y: auto; padding: 1.5rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.75rem;">
+            <!-- Populated dynamically by chat.js -->
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Loading secure chat history...
+            </div>
+        </div>
+
+        <!-- Input Box -->
+        <form id="chat-form" class="chat-input-bar">
+            <input type="text" id="chat-input-text" class="form-control" 
+                   placeholder="{% if chat.status == 'APPROVED' %}Type your message here...{% elif chat.status == 'PENDING_OWNER_APPROVAL' %}{% if session.get('role') == 'owner' %}Approve request above to start chatting...{% else %}Chat locked until owner approves your request...{% endif %}{% else %}Chat closed.{% endif %}" 
+                   autocomplete="off" 
+                   {% if chat.status != 'APPROVED' %}disabled{% endif %} required>
+            <button type="submit" id="chat-send-btn" class="btn btn-primary" style="padding: 0.65rem 1.5rem;" {% if chat.status != 'APPROVED' %}disabled{% endif %}>
+                <i class="fa-solid fa-paper-plane"></i> Send
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnApprove = document.getElementById('btn-owner-approve');
+    const btnDecline = document.getElementById('btn-owner-decline');
+
+    async function handleOwnerAction(action) {
+        const actionLabel = action === 'APPROVE' ? 'approve this request and enable chat' : 'decline this request';
+        if (!confirm(`Are you sure you want to ${actionLabel}?`)) return;
+
+        try {
+            const res = await fetch('/api/owner/chat-request/{{ chat.id }}/respond', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert(data.error || 'Failed to update request.');
+            }
+        } catch (err) {
+            alert('Network error responding to request.');
+        }
+    }
+
+    if (btnApprove) btnApprove.addEventListener('click', () => handleOwnerAction('APPROVE'));
+    if (btnDecline) btnDecline.addEventListener('click', () => handleOwnerAction('REJECT'));
+});
+</script>
+{% endblock %}

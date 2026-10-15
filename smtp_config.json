@@ -1,0 +1,8 @@
+{
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "smtp_user": "rohit.sharma19200611@gmail.com",
+    "smtp_pass": "bank uqpz kgmt qbym",
+    "from_email": "noreply@rentsafe.com",
+    "use_tls": true
+}

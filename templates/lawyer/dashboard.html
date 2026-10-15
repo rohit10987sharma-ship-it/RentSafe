@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Lawyer Legal Review Portal - RentSafe{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
+                <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--secondary);">
+                    Lawyer Verification Console
+                </h1>
+                <span class="role-tag lawyer" style="font-size: 0.85rem; padding: 4px 10px;">
+                    <i class="fa-solid fa-scale-balanced"></i> Panel Advocate
+                </span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Advocate: <strong>{{ current_user.name }}</strong> &bull; Lawyer ID: <span style="font-family: monospace; font-weight: 700; color: var(--primary);">{{ current_user.lawyer_id }}</span> &bull; Bar Reg: <strong>{{ current_user.bar_council_reg }}</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #fffbeb; color: #b45309;">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ counts.pending }}</h3>
+                <p>Pending Deed Reviews</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #ecfdf5; color: var(--success);">
+                <i class="fa-solid fa-certificate"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ counts.approved }}</h3>
+                <p>Deeds Certified</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #fef2f2; color: var(--danger);">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ counts.rejected }}</h3>
+                <p>Deeds Rejected</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Deed Verification Queue -->
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <div>
+            <h2 class="card-title" style="color: #b45309;">
+                <i class="fa-solid fa-hourglass-half"></i> Pending Property Deeds Awaiting Legal Clearance
+            </h2>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                Review the deed documents uploaded by flat owners. Verify ownership against Aadhaar identity before approving.
+            </p>
+        </div>
+        <span class="badge-status badge-pending">{{ pending_flats | length }} in queue</span>
+    </div>
+
+    {% if pending_flats %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Property & Location</th>
+                        <th>Owner & Aadhaar Status</th>
+                        <th>Submitted Deed</th>
+                        <th>Rent / Deposit</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for flat in pending_flats %}
+                        <tr>
+                            <td>
+                                <strong style="color: var(--secondary);">{{ flat.title }}</strong>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                    <i class="fa-solid fa-location-dot"></i> {{ flat.address }}, {{ flat.city }}
+                                </div>
+                                <span class="spec-chip" style="font-size: 0.72rem;">{{ flat.flat_type }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ flat.owner_name }}</strong>
+                                <div style="font-size: 0.78rem; color: #065f46; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                                    <i class="fa-solid fa-shield-check"></i> Aadhaar: {{ flat.aadhaar_number_masked }} (UIDAI Verified)
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">{{ flat.owner_email }}</div>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fa-solid fa-file-lines" style="color: #b45309; font-size: 1.2rem;"></i>
+                                    <div>
+                                        <div style="font-size: 0.85rem; font-weight: 600;">{{ flat.deed_original_name }}</div>
+                                        <a href="{{ url_for('serve_deed', filename=flat.deed_filename) }}" target="_blank" style="font-size: 0.75rem;">
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Document
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <strong>₹{{ "{:,.0f}".format(flat.rent_monthly) }}</strong> / mo
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Dep: ₹{{ "{:,.0f}".format(flat.deposit) }}</div>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('lawyer_review_deed', property_id=flat.id) }}" class="btn btn-sm btn-primary" style="background: #b45309; border-color: #b45309;">
+                                    <i class="fa-solid fa-gavel"></i> Legal Review
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem 1rem;">
+            <i class="fa-solid fa-check-double" style="font-size: 3rem; color: #10b981; margin-bottom: 1rem;"></i>
+            <h3 style="font-size: 1.15rem; font-weight: 700;">Deed Queue is Clear!</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">All uploaded property deeds have been examined and certified.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Recent Lawyer Verifications History -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title"><i class="fa-solid fa-history"></i> My Recent Legal Verifications</h2>
+        <span style="font-size: 0.82rem; color: var(--text-muted);">Certified properties</span>
+    </div>
+
+    {% if my_reviews %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Owner</th>
+                        <th>Status Verdict</th>
+                        <th>Lawyer Certificate Notes</th>
+                        <th>Certified On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rev in my_reviews %}
+                        <tr>
+                            <td>
+                                <strong>{{ rev.title }}</strong>
+                                <div style="font-size: 0.78rem; color: var(--text-muted);">{{ rev.city }}</div>
+                            </td>
+                            <td>{{ rev.owner_name }}</td>
+                            <td>
+                                {% if rev.deed_status == 'APPROVED' %}
+                                    <span class="badge-status badge-approved"><i class="fa-solid fa-check"></i> Approved</span>
+                                {% else %}
+                                    <span class="badge-status badge-rejected"><i class="fa-solid fa-xmark"></i> Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size: 0.82rem; max-width: 300px;">
+                                {{ rev.lawyer_notes or 'Title verified as freehold.' }}
+                            </td>
+                            <td style="font-size: 0.78rem; color: var(--text-muted);">{{ rev.reviewed_at }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="font-size: 0.88rem; color: var(--text-muted); text-align: center; padding: 1.5rem;">No prior reviews completed yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
